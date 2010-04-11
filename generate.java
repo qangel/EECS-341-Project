@@ -10,12 +10,13 @@ class generate{
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("update user u set u.modes=1 where u.modes=0");// change all the user exist now to the modes 1 which is play mode
-    setSchedule();
+    makeSchedule();
     File file=new File("start.html");
     PrintWriter output=new PrintWriter(file);
     output.print("");//put html code here and if you wish put the output.print() as more as possible
     
     output.close();
+     con.close();
   }
   
  /* public static void loginPage(userLogin e)throws Exception{
@@ -29,85 +30,119 @@ class generate{
       
   }*/
   
-  public static void setSchedule()throws Exception{
+  public static void randomSick()throws Exception{
   
-    
-  }//insert the schedule data to mysql
-  
-  public static void makeSchedule(int n,int[][] a){
-
-   doSchedule(n,a);
     
   }
- 
-  public static void doSchedule(int n,int[][] a){
   
-    if(n==1){
-    
-      a[0][0]=0;
-      return;
-    }
-    if(n%2==1){
-    
-      doSchedule(n+1,a);
-      return;
-    }
+  public static boolean makeSchedule()throws Exception{//make the schedule for our schedule table
 
-    doSchedule(n/2,a);
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("SELECT u.username from user u order by u.lossdata");
+    resultat.next();
+    ArrayList<String> userResult=new ArrayList<String>();
+    while(resultat.next()){
+      userResult.add(resultat.getString(1));}
+    int n=userResult.size();
     
-    copySchedule(n,a);
-  }
-  
-  public static void copySchedule(int n,int[][] a){
-  
-    if(n/2>1 && (n/2)%2==1)
-      copyOdd(n,a);
+    if(n==0)
+      return false;
+    
+    int [][] matchTable;
+    if(userResult.size()%2!=0){
+      n++;
+      matchTable=doSchedule(n);
+    }
     else
-      copy(n,a);
+      matchTable=doSchedule(n);
     
-  }
-  public static void copy(int n,int[][] a){
-
-   int m=n/2;
-
-   for(int i=0;i<m;++i)
-      for(int j=0;j<m;++j){
-
-      a[i][j+m]=a[i][j]+m;
- 
-      a[i+m][j]=a[i][j+m];
-
-      a[i+m][j+m]=a[i][j];
-    }
-  }
-  public static void copyOdd(int n,int[][] a){
-  
-      int m=n/2;
-      int b[]=new int[n];
-
-      for(int i=0;i<m;++i){
-
-         b[i]=m+i;
-         b[m+i]=b[i];
-      }
-       
-
-      for(int i=0;i<m;++i){
-         for(int j=0;j<m+1;++j){
-         if(a[i][j]>m){
-            a[i][j]=b[i];
-            a[m+i][j]=(b[i]+m)%n;
+    instruction.executeQuery("DROP TABLE IF EXISTS schedule");
+    String excuteString="CREATE TABLE schedule ( username CHAR(20) NOT NULL, ";
+    for(int i=0;i<n;++i)
+        excuteString+="week"+(i+1)+" CHAR(20), ";
+    
+    excuteString+="PRIMARY KEY (username), FOREIGN KEY (username) REFERENCES user (username))";
+    instruction.executeQuery(excuteString);
+    
+    if(userResult.size()!=n){
+      
+      for(int i=0;i<n;++i){
+        String theString="INSERT INTO schedule VALUES ("+userResult.get(i);
+        for(int j=0;j<n-1;++j){
+           if(matchTable[i][j]==userResult.size())
+             theString+=",break";
+           else
+             theString+=","+userResult.get(matchTable[i][j]);
          }
-         else{
-           a[m+i][j]=a[i][j]+m;}
-       }
-       for(int j=1;j<m;++j){
-
-          a[i][m+j]=b[i+j];
-
-           a[b[i+j]][m+j]=i;
-       }
+         theString+=")";
+         instruction.executeQuery(theString);
+        }
       }
+    else {
+      
+      for(int i=0;i<n;++i){
+        String theString="INSERT INTO schedule VALUES ("+userResult.get(i);
+        for(int j=0;j<n-1;++j){
+             theString+=","+userResult.get(matchTable[i][j]);
+         }
+         theString+=")";
+         instruction.executeQuery(theString);
+        }
+    }
+    con.close();
+    return true;
+  }
+ 
+  private static int[][] doSchedule(int n){
+    
+    if(n==2){
+      int[][] theTable=new int[2][1];
+      theTable[0][0]=1;
+      theTable[1][0]=0;
+       return theTable;
+    }
+    
+    int[][] matchSet=new int[n-1][n];
+    for(int i=0;i<n-1;++i)
+      matchSet[i][0]=n-1;
+    matchSet[0][1]=0;
+    
+    int factor=1;
+    for(int i=2;i<n;i=i+2){
+      matchSet[0][i]=factor;
+      factor++;
+    }
+    for(int i=n-1;i>=3;i=i-2){
+      matchSet[0][i]=factor;
+        factor++;
+    }
+    
+    ArrayList<Factor> mySet=new ArrayList<Factor>();
+
+    for(int k=1;k<n-1;++k){
+    for(int i=n-2;i>1;i=i-2){
+       mySet.add(new Factor(matchSet[k-1][i-1],matchSet[k-1][i]));
+    }
+     matchSet[k][1]=matchSet[k-1][n-1];
+     for(int i=2;i<n;i=i+2){
+       matchSet[k][i]=mySet.get(0).one;
+       matchSet[k][i+1]=mySet.get(0).two;
+       mySet.remove(0);
+     }
+     mySet.clear();
+    }
+    
+    int[][] matchTable=new int[n][n-1];
+    
+    for(int i=0;i<n-1;++i)
+      for(int j=0;j<n;j=j+2){
+         matchTable[matchSet[i][j]][i]=matchSet[i][j+1];
+         matchTable[matchSet[i][j+1]][i]=matchSet[i][j];
+      }
+
+    return matchTable;
   }
 
   public static ResultSet showAllSchedule()throws Exception{
@@ -116,6 +151,7 @@ class generate{
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("SELECT * from schedule");
+    con.close();
     return resultat;
   }
   
@@ -125,6 +161,7 @@ class generate{
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("SELECT * from players p where p.availability=0");// change all the user exist now to the modes 1 which is play mode
+    con.close();
     return resultat;
   }
   
@@ -135,6 +172,7 @@ class generate{
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("SELECT * from players");
+    con.close();
     return resultat;
   }
   
@@ -145,6 +183,7 @@ class generate{
     Statement instruction = con.createStatement();
     double total=passTD+passyards+interceptions+rushTD+rushyards+fumbles+receivingTD+receivingyards+pointsallowed+turnovers+sacks+defensiveTD+fl40+fg40+ml40+mg40+pat+mpat;
     ResultSet resultat = instruction.executeQuery("UPDATE weeklystats w SET passTD="+passTD+",passyards="+passyards+",interceptions="+interceptions+",rushTD="+rushTD+",rushyards="+rushyards+",fumbles="+fumbles+",receivingTD="+receivingTD+",receivingyards="+receivingyards+",pointsallowed="+pointsallowed+",turnovers="+turnovers+",sacks="+sacks+",defensiveTD="+defensiveTD+",fieldgoalless40="+fl40+",fieldgoalgreater40="+fg40+",missedfieldgoaless40="+ml40+",missedfieldgoalgreater40="+mg40+",PAT="+pat+",missedPAT="+mpat+",calpoints="+total+" where w.name='"+name+"'");//
+    con.close();
     return resultat;
   }
   
@@ -154,6 +193,7 @@ class generate{
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("SELECT u.teamname,u.windata FROM user u order by u.lossdata");
+    con.close();
     return resultat;
   }
   
@@ -162,7 +202,8 @@ class generate{
     Class.forName("com.mysql.jdbc.Driver");
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
-    ResultSet resultat = instruction.executeQuery("SELECT c.teamname,u.windata FROM user u order by u.lossdata");
+    ResultSet resultat =instruction.executeQuery("SELECT u.username,u.windata from user u order by u.lossdata");
+    con.close();
     return resultat;
   }
   
@@ -173,6 +214,7 @@ class generate{
     Statement instruction = con.createStatement();
     instruction.executeQuery("update totalstats t,weeklystats w set t.passTD=t.passTD+w.passTD,t.passyards=t.passyards+w.passyards,t.interceptions=t.interceptions+w.interceptions,t.rushTD=t.rushTD+w.rushTD,t.rushyards=t.rushyards+w.rushyards,t.fumbles=t.fumbles+w.fumbles,t.receivingTD=t.receivingTD+w.receivingTD,t.receivingyards=t.receivingyards+w.receivingyards,t.pointsallowed=t.pointsallowed+w.pointsallowed,t.turnovers=t.turnovers+w.turnovers,t.sacks=t.sacks+w.sacks,t.defensiveTD=t.defensiveTD+w.defensiveTD,t.fieldgoalless40=t.fieldgoalless40+w.fieldgoalless40,t.fieldgoalgreater40=t.fieldgoalgreater40+w.fieldgoalgreater40,t.missedfieldgoaless40=t.missedfieldgoaless40+w.missedfieldgoaless40,t.missedfieldgoalgreater40=t.missedfieldgoalgreater40+w.missedfieldgoalgreater40,t.PAT=t.PAT+w.PAT,t.missedPAT=t.missedPAT+w.missedPAT,t.calpoints=t.calpoints+w.calpoints where t.name=w.name");
     calWin();
+    con.close();
   }
   
   public static void setInjury(String name,String types)throws Exception{
@@ -181,6 +223,7 @@ class generate{
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("update players p set p.injury='"+types+"' where p.name='"+name+"'");
+    con.close();
   }
   
   //to let the system to determine which people will go first in the selection
@@ -190,6 +233,7 @@ class generate{
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("select u.username from user u oreder by lossdata");
+    con.close();
     return resultat;
   }
   
