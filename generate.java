@@ -239,5 +239,67 @@ class generate{
   
   public static void calWin()throws Exception{}
   
+  public static ResultSet rankTeams()throws Exception{
   
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("select u.username,u.teamname,u.windata,u.lossdata from user u order by u.rank");
+    con.close();
+    return resultat;
+    
+  }//* all of the team names in the league with their respective win/los record, and rank them in order
+  
+  public static ResultSet weeklyMatchUp(int currentWeek)throws Exception{
+  
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    String getWeek="week"+currentWeek;
+    ResultSet resultat = instruction.executeQuery("select s."+getWeek+" from schedule s");
+    con.close();
+    return resultat;
+    
+  }//* the weekly matchups for the current week
+  
+  public static ResultSet showAllPlayerSimple()throws Exception{
+  
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("select p.name,p.position,p.nflteam from player p where p.availability=1");
+    con.close();
+    return resultat;
+    
+  }//* player name, position and team for all available players, I just put their nflteeam for all available players
+    
+  public static void clearTeamroster(int totalTeam)throws Exception{
+    
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("select * from teamroster");
+    String halfValue="";
+    for(int i=0;i<(totalTeam-1)*2;++i)
+       halfValue+=",N";
+    halfValue=halfValue+")";
+    while(resultat.next()){
+    
+      String theName=resultat.getString(1);
+      String wholeValue="values ("+theName+halfValue;
+      instruction.executeQuery("DELETE FROM teamroster where teamname='"+theName+"'");
+      instruction.executeQuery("INSERT INTO teamroster "+wholeValue);
+    }
+    con.close();
+    }// a new function to help clear all the Teamroster in the new session to insert all posion as N
+  
+  public static ResultSet draftOrder()throws Exception{
+    
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("select u.username,u.teamname from user u order by u.lossdata");
+    con.close();
+    return resultat;
+  }//* the draft order of teams in the league, and which team's turn it is
 }
