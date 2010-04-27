@@ -13,17 +13,17 @@ public class RandomStats
         int numqb = 32;
         
         //Stats for a QB
-        int []qbTD;
-        int []qbYards;
-        int []qbInt;
+        int[] qbTD;
+        int[] qbYards;
+        int[] qbInt;
         
         //Points for QB
-        int []qbTDpnts;
-        int []qbYardspnts;
-        int []qbIntpnts;
+        int[] qbTDpnts;
+        int[] qbYardspnts;
+        int[] qbIntpnts;
         
         //Total points for QB
-        int []qbtotal;
+        int[] qbtotal;
         
         
          Random generator = new Random();
@@ -47,7 +47,7 @@ public class RandomStats
         q=0;
         while(q <= numqb)
         {
-            updateWeekStatsQB(qbTD[q], qbYards[q], qbInt[q], qbtotal[q]);
+            updateWeekStatsQB(qbTD[q]\, qbYards[q], qbInt[q], qbtotal[q]);
             q++;
         }
     }
@@ -320,24 +320,24 @@ public class RandomStats
     
     //UPDATE WEEKLY STATS FOR PLAYERS
     
-    public static void updateWeekStatsQB(int td, int yds, int intcp, int points)
+    public static void updateWeekStatsQB(int td, int yds, int intcp, int points,String playerName)
     {
         Class.forName("com.mysql.jdbc.Driver");
         //DON'T FORGET TO PUT THE USERNAME AND PASS FOR YOUR DRIVER CONNECTION TO THE DATABASE BELOW
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
         Statement instruction = conn.createStatement();
         //NEED TO FIGURE OUT HOW TO UPDATE ROW BY ROW
-        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET passTD="+td+",passYards="+yds+",interceptions="+intcp+", calpoints="+points+" WHERE (SELECT QB FROM weeklystats)" );
+        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET w.passTD="+td+",w.passYards="+yds+",w.interceptions="+intcp+",w.calpoints="+points+" WHERE w.name='"+playerName+"'" );
     }
     
-    public static void updateWeekStatsRB(int td, int yds, int fmbl, int points)
+    public static void updateWeekStatsRB(int td, int yds, int fmbl, int points,String playerName)
     {
         Class.forName("com.mysql.jdbc.Driver");
         //DON'T FORGET TO PUT THE USERNAME AND PASS FOR YOUR DRIVER CONNECTION TO THE DATABASE BELOW
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
         Statement instruction = conn.createStatement();
         //NEED TO FIGURE OUT HOW TO UPDATE ROW BY ROW
-        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET rushTD="+td+",rushYards="+yds+",fumbles="+fmbl+", calpoints="+points+" WHERE (SELECT RB FROM weeklystats)" );
+        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET w.rushTD="+td+",w.rushYards="+yds+",w.fumbles="+fmbl+",w.calpoints="+points+" WHERE w.name='"+playerName+"'");
     }
     
     public static void updateWeekStatsWR(int td, int yds, int points)
@@ -347,7 +347,7 @@ public class RandomStats
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
         Statement instruction = conn.createStatement();
         //NEED TO FIGURE OUT HOW TO UPDATE ROW BY ROW
-        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET recTD="+td+",recYards="+yds+", calpoints="+points+" WHERE (SELECT WR FROM weeklystats)" );
+        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET w.receivingTD="+td+",w.receivingYards="+yds+",w.calpoints="+points+" WHERE w.name='"+playerName+"'");
     }
     
     public static void updateWeekStatsTE(int td, int yds, int points)
@@ -357,7 +357,7 @@ public class RandomStats
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
         Statement instruction = conn.createStatement();
         //NEED TO FIGURE OUT HOW TO UPDATE ROW BY ROW
-        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET recTD="+td+",recYards="+yds+", calpoints="+points+" WHERE (SELECT TE FROM weeklystats)" );
+        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET w.receivingTD="+td+",w.receivingYards="+yds+",w.calpoints="+points+" WHERE w.name='"+playerName+"'");
     }
     
     public static void updateWeekStatsDEF(int to, int sack, int td, int allow, int points)
@@ -367,7 +367,7 @@ public class RandomStats
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
         Statement instruction = conn.createStatement();
         //NEED TO FIGURE OUT HOW TO UPDATE ROW BY ROW
-        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET turnovers="+to+",sacks="+sack+", defTD="+td+", pntsallowed="+allow+", calpoints="+points+" WHERE (SELECT DEF FROM weeklystats)" );
+        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET w.turnovers="+to+",w.sacks="+sack+",w.defensiveTD="+td+",w.pointsallowed="+allow+", calpoints="+points+" w.name='"+playerName+"'");
     }
     
     public static void updateWeekStatsK(int l40, int g40, int ml40, int mg40, int pat, int mpat, int points)
@@ -377,7 +377,7 @@ public class RandomStats
         Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
         Statement instruction = conn.createStatement();
         //NEED TO FIGURE OUT HOW TO UPDATE ROW BY ROW
-        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET fgless40="+l40+", fggreat40="+g40+", missfgless40="+ml40+", missfggreat40="+mg40+", PAT="+pat+", missPAT="+mpat+", calpoints="+points+" WHERE (SELECT K FROM weeklystats)" );
+        ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET w.fieldgoalless40="+l40+",w.fieldgoalgreater40="+g40+",w.missedfieldgoaless40="+ml40+",w.missedfieldgoalgreater40="+mg40+",w.PAT="+pat+",w.missPAT="+mpat+",w.calpoints="+points+" WHERE w.name='"+playerName+"'");
     }
 
 }
