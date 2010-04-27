@@ -302,4 +302,23 @@ class generate{
     con.close();
     return resultat;
   }//* the draft order of teams in the league, and which team's turn it is
+  
+  public static void initialWeeklystats()throws Exception{
+  
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("update weeklystats set passTD=0,passyards=0,interceptions=0,rushTD=0,rushyards=0,fumbles=0,receivingTD=0,receivingyards=0,pointsallowed=0,turnovers=0,sacks=0,defensiveTD=0,fieldgoalless40=0,fieldgoalgreater40=0,missedfieldgoaless40=0,missedfieldgoalgreater40=0,PAT=0,missedPAT=0,calpoints=0");
+    con.close();
+  }//put all weeklystats to zero
+  
+  public static void initialtotalstats()throws Exception{
+  
+      
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("update totalstats set passTD=0,passyards=0,interceptions=0,rushTD=0,rushyards=0,fumbles=0,receivingTD=0,receivingyards=0,pointsallowed=0,turnovers=0,sacks=0,defensiveTD=0,fieldgoalless40=0,fieldgoalgreater40=0,missedfieldgoaless40=0,missedfieldgoalgreater40=0,PAT=0,missedPAT=0,calpoints=0");
+    con.close();
+  }
 }
