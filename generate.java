@@ -314,11 +314,34 @@ class generate{
   
   public static void initialtotalstats()throws Exception{
   
-      
     Class.forName("com.mysql.jdbc.Driver");
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     ResultSet resultat = instruction.executeQuery("update totalstats set passTD=0,passyards=0,interceptions=0,rushTD=0,rushyards=0,fumbles=0,receivingTD=0,receivingyards=0,pointsallowed=0,turnovers=0,sacks=0,defensiveTD=0,fieldgoalless40=0,fieldgoalgreater40=0,missedfieldgoaless40=0,missedfieldgoalgreater40=0,PAT=0,missedPAT=0,calpoints=0");
     con.close();
   }
+  
+  public static void randomInjuryStatus()throws Exception{
+  
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultat = instruction.executeQuery("SELECT name from player");
+    while(resultat.next()){
+    
+      String temp=resultat.getString(1);
+      double dick=Math.random()*10;
+      if(dick<1){
+      
+        ResultSet tempResult=instruction.executeQuery("SELECT p.name,p.injurystate from player p where p.name='"+temp+"'");
+        tempResult.next();
+        if(tempResult.getString(2).equals("Q"))
+          instruction.executeQuery("update player p SET p.injurystate='O' where p.name='"+temp+"'");
+        else 
+          instruction.executeQuery("update player p SET p.injurystate='Q' where p.name='"+temp+"'");
+      }
+    }
+    
+    con.close();
+  }//random assign injury to each people
 }
