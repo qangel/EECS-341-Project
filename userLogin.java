@@ -80,7 +80,7 @@ class userLogin{
     Class.forName("com.mysql.jdbc.Driver");
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
-    ResultSet resultat = instruction.executeQuery("SELECT * FROM teamroster t where t.teamname IN (select u.teamname from user u where u.username='"+username+"'");
+    ResultSet resultat = instruction.executeQuery("SELECT * FROM teamroster t where t.teamname='"+teamname+"'");
     con.close();
     return resultat;
   }
@@ -90,7 +90,7 @@ class userLogin{
     Class.forName("com.mysql.jdbc.Driver");
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
-    ResultSet resultat = instruction.executeQuery("SELECT * FROM schedule s where s.teamname IN (SELECT u.teamname from user u where u.username='"+username+"')");
+    ResultSet resultat = instruction.executeQuery("SELECT * FROM schedule s where s.teamname ='"+teamname+"')");
     con.close();
     return resultat;
   }
@@ -111,7 +111,7 @@ class userLogin{
     Class.forName("com.mysql.jdbc.Driver");
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
-    ResultSet resultat = instruction.executeQuery("SELECT * FROM schedule s where s.teamname IN (SELECT u.teamname from user u where u.username='"+username+"')");
+    ResultSet resultat = instruction.executeQuery("SELECT * FROM schedule s where s.teamname ='"+teamname+"')");
     resultat.next();
     con.close();
     return resultat;
@@ -155,7 +155,7 @@ class userLogin{
     Class.forName("com.mysql.jdbc.Driver");
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
-    ResultSet resultat = instruction.executeQuery("update teamroster t set t."+position+"='"+name+"' where t.teamname IN (select u.teamname from user u where u.username='"+username+"')");
+    ResultSet resultat = instruction.executeQuery("update teamroster t set t."+position+"='"+name+"' where t.teamname='"+teamname+"')");
     con.close();
   }
   
