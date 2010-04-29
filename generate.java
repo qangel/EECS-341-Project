@@ -207,13 +207,14 @@ class generate{
     return resultat;
   }
   
-  public static void startNextWeek()throws Exception{
+  public static void startNextWeek(int thisWeek)throws Exception{
   
     Class.forName("com.mysql.jdbc.Driver");
     Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
     Statement instruction = con.createStatement();
     instruction.executeQuery("update totalstats t,weeklystats w set t.passTD=t.passTD+w.passTD,t.passyards=t.passyards+w.passyards,t.interceptions=t.interceptions+w.interceptions,t.rushTD=t.rushTD+w.rushTD,t.rushyards=t.rushyards+w.rushyards,t.fumbles=t.fumbles+w.fumbles,t.receivingTD=t.receivingTD+w.receivingTD,t.receivingyards=t.receivingyards+w.receivingyards,t.pointsallowed=t.pointsallowed+w.pointsallowed,t.turnovers=t.turnovers+w.turnovers,t.sacks=t.sacks+w.sacks,t.defensiveTD=t.defensiveTD+w.defensiveTD,t.fieldgoalless40=t.fieldgoalless40+w.fieldgoalless40,t.fieldgoalgreater40=t.fieldgoalgreater40+w.fieldgoalgreater40,t.missedfieldgoaless40=t.missedfieldgoaless40+w.missedfieldgoaless40,t.missedfieldgoalgreater40=t.missedfieldgoalgreater40+w.missedfieldgoalgreater40,t.PAT=t.PAT+w.PAT,t.missedPAT=t.missedPAT+w.missedPAT,t.calpoints=t.calpoints+w.calpoints where t.name=w.name");
-    calWin();
+    calWin(thisWeek);
+    calRank();
     con.close();
   }
   
@@ -237,7 +238,79 @@ class generate{
     return resultat;
   }
   
-  public static void calWin()throws Exception{}
+  //calculate all the winner in each week.
+  public static void calWin(int thisWeek)throws Exception{
+  
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultS = instruction.executeQuery("select s.username,s.week"+thisWeek+" from schedule");
+    ResultSet resultT = instruction.executeQuery("select * from schedule");
+    int totalTeam=(resultT.getMetaData().getColumnCount()-1)/2;
+    while(resultS.next()){
+    
+      String first=resultS.getString(1);
+      String second=resultS.getString(2);
+      ResultSet resultA = instruction.executeQuery("select distinct w.name,w.calpoints from weeklystats w where w.name IN (select p.name from players p where p.owner='"+first+"'");
+      ResultSet resultB = instruction.executeQuery("select distinct w.name,w.calpoints from weeklystats w where w.name IN (select p.name from players p where p.owner='"+second+"'");
+      double calpointA=0;
+      double calpointB=0;
+      while(resultA.next()){
+        
+         calpointA+=resultA.getDouble(2);
+      }
+       
+      while(resultB.next()){
+        
+        calpointB+=resultB.getDouble(2);
+      }
+      
+      if(thisWeek>totalTeam){
+      
+        if(calpointA>=calpointB){
+        
+          instruction.executeQuery("update user u SET u.windata=u.windata+1 where u.username='"+first+"'");
+          instruction.executeQuery("update user u SET u.lossdata=u.lossdata+1 where u.username='"+second+"'");
+        }
+        else {
+        
+          instruction.executeQuery("update user u SET u.windata=u.windata+1 where u.username='"+second+"'");
+          instruction.executeQuery("update user u SET u.lossdata=u.lossdata+1 where u.username='"+first+"'");
+        }
+      }
+      else {
+      
+        if(calpointA>calpointB){
+        
+          instruction.executeQuery("update user u SET u.windata=u.windata+1 where u.username='"+first+"'");
+          instruction.executeQuery("update user u SET u.lossdata=u.lossdata+1 where u.username='"+second+"'");
+        }
+        else {
+        
+          instruction.executeQuery("update user u SET u.windata=u.windata+1 where u.username='"+second+"'");
+          instruction.executeQuery("update user u SET u.lossdata=u.lossdata+1 where u.username='"+first+"'");
+        }
+      }
+    }
+    
+    con.close();
+  }//calculate the winner of specific roster
+  
+  public static void calRank()throws Exception{
+  
+    Class.forName("com.mysql.jdbc.Driver");
+    Connection con= DriverManager.getConnection("jdbc:mysql://localhost/jlj?user=root");
+    Statement instruction = con.createStatement();
+    ResultSet resultAt = instruction.executeQuery("select u.username from user u order by u.windata,u.rank");
+    int rankIndex=1;
+    instruction.executeQuery("update user u SET u.rank=null");
+    while(resultAt.next()){
+      String temp=resultAt.getString(1);
+      instruction.executeQuery("update user u SET u.rank="+rankIndex+" where u.username='"+temp+"'");
+      rankIndex++;
+    }
+    con.close();
+  }
   
   public static ResultSet rankTeams()throws Exception{
   

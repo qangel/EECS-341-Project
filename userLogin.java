@@ -590,6 +590,35 @@ class userLogin{
         ResultSet result = instruction.executeQuery("UPDATE weeklystats w SET w.fieldgoalless40="+l40+",w.fieldgoalgreater40="+g40+",w.missedfieldgoaless40="+ml40+",w.missedfieldgoalgreater40="+mg40+",w.PAT="+pat+",w.missPAT="+mpat+",w.calpoints="+points+" WHERE w.name='"+playerName+"'");
         conn.close();
     }
+    
+    public boolean compareWin(String otherUserName)throws Exception{
+    
+        Class.forName("com.mysql.jdbc.Driver");
+        //DON'T FORGET TO PUT THE USERNAME AND PASS FOR YOUR DRIVER CONNECTION TO THE DATABASE BELOW
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
+        Statement instruction = conn.createStatement();
+        //NEED TO FIGURE OUT HOW TO UPDATE ROW BY ROW
+        ResultSet resultA = instruction.executeQuery("select w.name,w.calpoints from weeklystats w where w.name IN (select p.name from players p where p.owner='"+username+"'");
+        ResultSet resultB = instruction.executeQuery("select w.name,w.calpoints from weeklystats w where w.name IN (select p.name from players p where p.owner='"+otherUserName+"'");
+        double calpointA=0;
+        double calpointB=0;
+        while(resultA.next()){
+        
+          calpointA+=resultA.getDouble(2);
+        }
+        
+        while(resultB.next()){
+        
+          calpointB+=resultB.getDouble(2);
+        }
+        
+        
+        conn.close();
+        if(calpointA<calpointB)
+          return true;//true means this user wins
+        else 
+          return false;//false means other wins
+    }//a new method to compare the winner between this user and the other user, remember the other input is username instead of teamname
   
   
 }
